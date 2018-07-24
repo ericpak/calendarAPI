@@ -68,24 +68,28 @@ function getAccessToken(oAuth2Client, callback) {
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function listEvents(auth) {
+  let timeMin = "2018-07-10T00:00:00-08:00";
+  let timeMax = "2018-07-10T23:59:59-08:00";
+
   const calendar = google.calendar({version: 'v3', auth});
   calendar.events.list({
     calendarId: 'primary',
-    timeMin: (new Date()).toISOString(),
-    maxResults: 10,
+    timeMin: (new Date(timeMin)).toISOString(),
+    timeMax: (new Date(timeMax).toISOString()),
     singleEvents: true,
     orderBy: 'startTime',
   }, (err, res) => {
     if (err) return console.log('The API returned an error: ' + err);
     const events = res.data.items;
     if (events.length) {
-      console.log('Upcoming 10 events:');
+      console.log('Events between:'+timeMin+" and "+timeMax+"\n");
       events.map((event, i) => {
         const start = event.start.dateTime || event.start.date;
         console.log(`${start} - ${event.summary}`);
+        console.log(event.location);
       });
     } else {
-      console.log('No upcoming events found.');
+      console.log('No events found.');
     }
   });
 }
