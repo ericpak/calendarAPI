@@ -9,8 +9,15 @@ const TOKEN_PATH = 'token.json';
 // Load client secrets from a local file.
 fs.readFile('credentials.json', (err, content) => {
   if (err) return console.log('Error loading client secret file:', err);
-  // Authorize a client with credentials, then call the Google Calendar API.
-  authorize(JSON.parse(content), listEvents);
+  switch(process.argv[2]) {
+    case("getSchedule"):
+      // Authorize a client with credentials, then call the Google Calendar API.
+      return authorize(JSON.parse(content), listEvents);
+    default:
+  }
+
+  console.log("Usage: node calendarAPI.js <command> [arguments]\n");
+  console.log("where <command> is one of: getSchedule, ");
 });
 
 /**
@@ -64,7 +71,7 @@ function getAccessToken(oAuth2Client, callback) {
 }
 
 /**
- * Lists the next 10 events on the user's primary calendar.
+ * Lists the events on the user's primary calendar.
  * @param {google.auth.OAuth2} auth An authorized OAuth2 client.
  */
 function listEvents(auth) {
@@ -82,11 +89,12 @@ function listEvents(auth) {
     if (err) return console.log('The API returned an error: ' + err);
     const events = res.data.items;
     if (events.length) {
-      console.log('Events between:'+timeMin+" and "+timeMax+"\n");
+      console.log('Events between:'+timeMin+" and "+timeMax+"");
       events.map((event, i) => {
-        const start = event.start.dateTime || event.start.date;
-        console.log(`${start} - ${event.summary}`);
-        console.log(event.location);
+        const start = event.start.dateTime;
+        const end = event.end.dateTime;
+        console.log(`${start} - ${end} : ${event.summary}`);
+        console.log(event.location+"\n");
       });
     } else {
       console.log('No events found.');
